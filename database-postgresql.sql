@@ -279,19 +279,29 @@ CREATE INDEX IF NOT EXISTS idx_oi_product      ON order_items(product_id);
 -- ============================================================
 -- Chaves estrangeiras
 -- ============================================================
-ALTER TABLE cart_list
-  ADD CONSTRAINT customer_id_fk_cl FOREIGN KEY (customer_id) REFERENCES customer_list(id) ON DELETE CASCADE,
-  ADD CONSTRAINT product_id_fk_cl  FOREIGN KEY (product_id)  REFERENCES product_list(id)  ON DELETE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE cart_list ADD CONSTRAINT customer_id_fk_cl FOREIGN KEY (customer_id) REFERENCES customer_list(id) ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-ALTER TABLE order_items
-  ADD CONSTRAINT order_id_fk_oi   FOREIGN KEY (order_id)   REFERENCES order_list(id)    ON DELETE CASCADE,
-  ADD CONSTRAINT product_id_fk_oi FOREIGN KEY (product_id) REFERENCES product_list(id)  ON DELETE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE cart_list ADD CONSTRAINT product_id_fk_cl FOREIGN KEY (product_id) REFERENCES product_list(id) ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-ALTER TABLE order_list
-  ADD CONSTRAINT customer_id_fk_ol FOREIGN KEY (customer_id) REFERENCES customer_list(id) ON DELETE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE order_items ADD CONSTRAINT order_id_fk_oi FOREIGN KEY (order_id) REFERENCES order_list(id) ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-ALTER TABLE referral
-  ADD CONSTRAINT customer_id_fk_re FOREIGN KEY (customer_id) REFERENCES customer_list(id) ON DELETE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE order_items ADD CONSTRAINT product_id_fk_oi FOREIGN KEY (product_id) REFERENCES product_list(id) ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  ALTER TABLE order_list ADD CONSTRAINT customer_id_fk_ol FOREIGN KEY (customer_id) REFERENCES customer_list(id) ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  ALTER TABLE referral ADD CONSTRAINT customer_id_fk_re FOREIGN KEY (customer_id) REFERENCES customer_list(id) ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- ============================================================
 -- Dados obrigatórios
