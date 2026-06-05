@@ -35,6 +35,35 @@ class DBResult
     }
 }
 
+/** Simula mysqli_stmt para prepared statements */
+class PgStatement
+{
+    private \PDOStatement $stmt;
+    private array $params = [];
+
+    public function __construct(\PDOStatement $stmt)
+    {
+        $this->stmt = $stmt;
+    }
+
+    public function bind_param(string $types, mixed &...$vars): void
+    {
+        $this->params = array_values($vars);
+    }
+
+    public function execute(): bool
+    {
+        return $this->stmt->execute($this->params);
+    }
+
+    public function get_result(): DBResult
+    {
+        return new DBResult($this->stmt->fetchAll(\PDO::FETCH_ASSOC));
+    }
+
+    public function close(): void {}
+}
+
 class PgConnection
 {
     private PDO $pdo;
@@ -49,13 +78,26 @@ class PgConnection
     /** Converte sintaxe MySQL → PostgreSQL */
     private function translate(string $sql): string
     {
-        // Backticks → sem aspas (nomes em lowercase já funcionam no PG)
+        // Backticks → sem aspas
         $sql = preg_replace('/`([^`]+)`/', '$1', $sql);
-        // REGEXP → ~ (operador regex do PostgreSQL)
+        // REGEXP → ~
         $sql = preg_replace('/\bREGEXP\b/i', '~', $sql);
-        // RAND() → RANDOM() (MySQL → PostgreSQL)
+        // RAND() → RANDOM()
         $sql = preg_replace('/\bRAND\s*\(\s*\)/i', 'RANDOM()', $sql);
+        // FIND_IN_SET(val, col) → val = ANY(string_to_array(col, ','))
+        $sql = preg_replace_callback(
+            '/FIND_IN_SET\s*\(([^,]+),([^)]+)\)/i',
+            fn($m) => trim($m[1]) . ' = ANY(string_to_array(' . trim($m[2]) . ", ','))",
+            $sql
+        );
         return $sql;
+    }
+
+    public function prepare(string $sql): PgStatement
+    {
+        $sql  = $this->translate($sql);
+        $stmt = $this->pdo->prepare($sql);
+        return new PgStatement($stmt);
     }
 
     public function query(string $sql): DBResult|bool
