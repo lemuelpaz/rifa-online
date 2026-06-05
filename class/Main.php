@@ -596,6 +596,12 @@ class Main extends DBConnection
 
         $save = $this->conn->query($sql);
 
+        if (!$save) {
+            $resp["status"] = "failed";
+            $resp["msg"] = "[DEBUG] Falha no UPDATE do produto. Erro: " . $this->conn->error;
+            return json_encode($resp);
+        }
+
         if ($save) {
             $pid = !empty($id) ? $id : $this->conn->insert_id;
             $resp["pid"] = $pid;
@@ -723,9 +729,12 @@ class Main extends DBConnection
                         }
 
                         if ($upload) {
-                            $this->conn->query(
+                            $imgUpdate = $this->conn->query(
                                 'UPDATE product_list SET image_path = \'' . $spath . '?v=' . time() . '\' WHERE id = \'' . $pid . '\''
                             );
+                            $resp["img_debug"] = $imgUpdate ? "img_ok:$spath" : "img_fail:" . $this->conn->error;
+                        } else {
+                            $resp["img_debug"] = "upload_fail:path=$spath,base=" . BASE_APP;
                         }
 
                         imagedestroy($temp_cropped);
