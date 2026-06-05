@@ -1,35 +1,128 @@
 <?php
 
+/**
+ * Wrapper PostgreSQL com interface compatível com mysqli.
+ * Substitui a conexão mysqli original para funcionar no Render com PostgreSQL.
+ */
+class DBResult
+{
+    public int $num_rows = 0;
+    private array $rows = [];
+    private int $position = 0;
+
+    public function __construct(array $rows)
+    {
+        $this->rows     = $rows;
+        $this->num_rows = count($rows);
+    }
+
+    public function fetch_assoc(): ?array
+    {
+        if ($this->position >= $this->num_rows) return null;
+        return $this->rows[$this->position++];
+    }
+
+    public function fetch_row(): ?array
+    {
+        $row = $this->fetch_assoc();
+        return $row ? array_values($row) : null;
+    }
+
+    public function fetch_array(): ?array
+    {
+        return $this->fetch_assoc();
+    }
+}
+
+class PgConnection
+{
+    private PDO $pdo;
+    public string $error = '';
+    public int $insert_id = 0;
+
+    public function __construct(PDO $pdo)
+    {
+        $this->pdo = $pdo;
+    }
+
+    private function translate(string $sql): string
+    {
+        $sql = preg_replace('/`([^`]+)`/', '$1', $sql);
+        $sql = preg_replace('/\bREGEXP\b/i', '~', $sql);
+        return $sql;
+    }
+
+    public function query(string $sql): DBResult|bool
+    {
+        try {
+            $sql  = $this->translate($sql);
+            $type = strtoupper(substr(ltrim($sql), 0, 6));
+
+            if ($type === 'INSERT') {
+                $hasTurning = stripos($sql, 'RETURNING') !== false;
+                $stmt = $this->pdo->query($hasTurning ? $sql : $sql . ' RETURNING id');
+                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $this->insert_id = !empty($rows[0]['id']) ? (int) $rows[0]['id'] : 0;
+                return new DBResult([]);
+            }
+
+            $stmt = $this->pdo->query($sql);
+            return new DBResult($stmt->fetchAll(PDO::FETCH_ASSOC));
+
+        } catch (PDOException $e) {
+            $this->error = $e->getMessage();
+            error_log('[DB] ' . $e->getMessage() . ' | SQL: ' . $sql);
+            return false;
+        }
+    }
+
+    public function real_escape_string(string $str): string
+    {
+        return str_replace("'", "''", $str);
+    }
+
+    public function set_charset(string $charset): void {}
+
+    public function close(): void {}
+}
 
 class DBConnection
 {
-	private $host = DB_SERVER;
-	private $username = DB_USERNAME;
-	private $password = DB_PASSWORD;
-	private $database = DB_NAME;
-	public $conn = null;
+    public PgConnection $conn;
 
-	public function __construct()
-	{
-		if (!isset($this->conn)) {
-			$this->conn = new mysqli($this->host, $this->username, $this->password, $this->database);
-			$this->conn->set_charset('utf8mb4');
+    public function __construct()
+    {
+        if (!defined('DB_SERVER')) {
+            require_once __DIR__ . '/../initialize.php';
+        }
 
-			if (!$this->conn) {
-				echo 'Cannot connect to database server';
-				exit();
-			}
-		}
-	}
+        $database_url = getenv('DATABASE_URL');
+        if ($database_url) {
+            $p    = parse_url($database_url);
+            $host = $p['host'];
+            $port = $p['port'] ?? 5432;
+            $user = $p['user'];
+            $pass = $p['pass'];
+            $name = ltrim($p['path'], '/');
+            $dsn  = "pgsql:host={$host};port={$port};dbname={$name}";
+        } else {
+            $port = defined('DB_PORT') ? DB_PORT : 5432;
+            $dsn  = 'pgsql:host=' . DB_SERVER . ';port=' . $port . ';dbname=' . DB_NAME;
+            $user = DB_USERNAME;
+            $pass = DB_PASSWORD;
+        }
 
-	public function __destruct()
-	{
-		$this->conn->close();
-	}
+        $pdo = new PDO($dsn, $user, $pass, [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        ]);
+
+        $this->conn = new PgConnection($pdo);
+    }
+
+    public function __destruct() {}
 }
 
 if (!defined('DB_SERVER')) {
-	require_once '../initialize.php';
+    require_once '../initialize.php';
 }
-
-?>
