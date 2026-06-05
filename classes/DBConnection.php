@@ -102,10 +102,24 @@ class DBConnection
             require_once __DIR__ . '/../initialize.php';
         }
 
-        $port = defined('DB_PORT') ? DB_PORT : 5432;
-        $dsn  = 'pgsql:host=' . DB_SERVER . ';port=' . $port . ';dbname=' . DB_NAME;
+        // Suporta DATABASE_URL (formato do Render)
+        $database_url = getenv('DATABASE_URL');
+        if ($database_url) {
+            $p    = parse_url($database_url);
+            $host = $p['host'];
+            $port = $p['port'] ?? 5432;
+            $user = $p['user'];
+            $pass = $p['pass'];
+            $name = ltrim($p['path'], '/');
+            $dsn  = "pgsql:host={$host};port={$port};dbname={$name}";
+        } else {
+            $port = defined('DB_PORT') ? DB_PORT : 5432;
+            $dsn  = 'pgsql:host=' . DB_SERVER . ';port=' . $port . ';dbname=' . DB_NAME;
+            $user = DB_USERNAME;
+            $pass = DB_PASSWORD;
+        }
 
-        $pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, [
+        $pdo = new PDO($dsn, $user, $pass, [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         ]);
