@@ -27,6 +27,7 @@ echo '<div id="overlay">' . "\r\n" . '  <div class="cv-spinner">' . "\r\n" . '  
 $image_gallery = (isset($image_gallery) ? $image_gallery : '');
 if (($image_gallery != '[]') && !empty($image_gallery)) {
     $image_gallery = json_decode($image_gallery, true);
+    if (!is_array($image_gallery)) $image_gallery = [];
     array_unshift($image_gallery, $image_path);
     echo '               ';
     $slide = 0;

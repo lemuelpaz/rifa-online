@@ -963,6 +963,7 @@ $stmt->close();
 
                     if ($image_gallery != '[]' && !empty($image_gallery)) {
                         $image_gallery = json_decode($image_gallery, true);
+                        if (!is_array($image_gallery)) $image_gallery = [];
                         array_unshift($image_gallery, $image_path);
                         echo '               ';
                         $slide = 0;
