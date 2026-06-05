@@ -29,6 +29,89 @@ class Main extends DBConnection
         }
     }
 
+    public function update_product_image()
+    {
+        $resp = ['status' => 'failed', 'msg' => ''];
+        $pid  = intval($_POST['product_id'] ?? 0);
+
+        if (!$pid) {
+            $resp['msg'] = 'ID da campanha inválido.';
+            return json_encode($resp);
+        }
+
+        if (empty($_FILES['img']['tmp_name'])) {
+            $resp['msg'] = 'Nenhuma imagem enviada.';
+            return json_encode($resp);
+        }
+
+        $accept = ['image/jpeg', 'image/png'];
+        if (!in_array($_FILES['img']['type'], $accept)) {
+            $resp['msg'] = 'Tipo de arquivo inválido. Use JPG ou PNG.';
+            return json_encode($resp);
+        }
+
+        $img_path = 'uploads/campanhas';
+        if (!is_dir(BASE_APP . $img_path)) {
+            mkdir(BASE_APP . $img_path, 0755, true);
+        }
+
+        if ($_FILES['img']['type'] === 'image/jpeg') {
+            $src = imagecreatefromjpeg($_FILES['img']['tmp_name']);
+        } else {
+            $src = imagecreatefrompng($_FILES['img']['tmp_name']);
+        }
+
+        if (!$src) {
+            $resp['msg'] = 'Imagem inválida ou corrompida.';
+            return json_encode($resp);
+        }
+
+        // Redimensiona mantendo proporção, corta centro para 600x600
+        list($w, $h) = getimagesize($_FILES['img']['tmp_name']);
+        $ratio = $w / $h;
+        if ($ratio > 1) { $tw = (int)(600 * $ratio); $th = 600; }
+        else             { $tw = 600; $th = (int)(600 / $ratio); }
+
+        $resized  = imagecreatetruecolor($tw, $th);
+        imagecopyresampled($resized, $src, 0, 0, 0, 0, $tw, $th, $w, $h);
+        $cropped  = imagecrop($resized, ['x' => (int)(($tw - 600) / 2), 'y' => (int)(($th - 600) / 2), 'width' => 600, 'height' => 600]);
+        if (!$cropped) $cropped = $resized;
+
+        // Nome único do arquivo
+        $ext   = $_FILES['img']['type'] === 'image/jpeg' ? 'jpg' : 'png';
+        $fname = $img_path . '/produto_' . $pid . '_' . time() . '.' . $ext;
+
+        if ($ext === 'jpg') {
+            $ok = imagejpeg($cropped, BASE_APP . $fname, 90);
+        } else {
+            $ok = imagepng($cropped, BASE_APP . $fname, 8);
+        }
+
+        imagedestroy($src);
+        imagedestroy($resized);
+        if ($cropped !== $resized) imagedestroy($cropped);
+
+        if (!$ok) {
+            $resp['msg'] = 'Falha ao salvar o arquivo no servidor.';
+            return json_encode($resp);
+        }
+
+        $path_db  = $fname . '?v=' . time();
+        $saved    = $this->conn->query(
+            "UPDATE product_list SET image_path = '" . $path_db . "' WHERE id = " . $pid
+        );
+
+        if ($saved) {
+            $resp['status']     = 'success';
+            $resp['msg']        = 'Imagem atualizada com sucesso!';
+            $resp['image_url']  = BASE_URL . $fname . '?v=' . time();
+        } else {
+            $resp['msg'] = 'Imagem salva mas falha ao atualizar banco: ' . $this->conn->error;
+        }
+
+        return json_encode($resp);
+    }
+
     public function save_product()
     {
         $id = $_POST["id"];
@@ -596,12 +679,6 @@ class Main extends DBConnection
 
         $save = $this->conn->query($sql);
 
-        if (!$save) {
-            $resp["status"] = "failed";
-            $resp["msg"] = "[DEBUG] Falha no UPDATE do produto. Erro: " . $this->conn->error;
-            return json_encode($resp);
-        }
-
         if ($save) {
             $pid = !empty($id) ? $id : $this->conn->insert_id;
             $resp["pid"] = $pid;
@@ -729,12 +806,9 @@ class Main extends DBConnection
                         }
 
                         if ($upload) {
-                            $imgUpdate = $this->conn->query(
-                                'UPDATE product_list SET image_path = \'' . $spath . '?v=' . time() . '\' WHERE id = \'' . $pid . '\''
+                            $this->conn->query(
+                                'UPDATE product_list SET image_path = \'' . $spath . '?v=' . time() . '\' WHERE id = ' . intval($pid)
                             );
-                            $resp["img_debug"] = $imgUpdate ? "img_ok:$spath" : "img_fail:" . $this->conn->error;
-                        } else {
-                            $resp["img_debug"] = "upload_fail:path=$spath,base=" . BASE_APP;
                         }
 
                         imagedestroy($temp_cropped);
@@ -5891,6 +5965,9 @@ $sysset = new System();
 switch ($action) {
     case "save_product_sys":
         echo $Main->save_product();
+        break;
+    case "update_product_image":
+        echo $Main->update_product_image();
         break;
     case "buscar_hora_premiada":
         echo $Main->buscar_hora_premiada();

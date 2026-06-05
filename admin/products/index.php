@@ -356,14 +356,16 @@ while ($row = $qry->fetch_assoc()) {
 
 		'<a href="./?page=products/manage_product&id=';
 	echo $row['id'];
-	echo '">' . "\r\n\t\t\t" . '<button title="Editar" ' . "\r\n\t\t\t" . 'class="flex items-center justify-between px-2 py-2 text-sm font-medium leading-5 text-purple-600 rounded-lg dark:text-gray-400 focus:outline-none focus:shadow-outline-gray"' . "\r\n\t\t\t" . 'aria-label="Edit">' . "\r\n\t\t\t\t" . '    <i class="fa-duotone  fa-pen-to-square" style="color: #5827AC;font-size:22px"></i> 
+	echo '">' . "\r\n\t\t\t" . '<button title="Editar campanha" ' . "\r\n\t\t\t" . 'class="flex items-center justify-between px-2 py-2 text-sm font-medium leading-5 text-purple-600 rounded-lg dark:text-gray-400 focus:outline-none focus:shadow-outline-gray"' . "\r\n\t\t\t" . 'aria-label="Edit">' . "\r\n\t\t\t\t" . '<i class="fa-duotone fa-pen-to-square" style="color:#5827AC;font-size:22px"></i>' . "\r\n\t\t\t" . '</button></a>';
 
-		
-' . "\r\n\t\t\t" .
+	// Botão Editar Imagem
+	echo '<button onclick="openImgModal(' . $row['id'] . ')" title="Editar imagem principal"
+		class="flex items-center justify-between px-2 py-2 text-sm font-medium leading-5 text-purple-600 rounded-lg dark:text-gray-400 focus:outline-none focus:shadow-outline-gray"
+		aria-label="Editar imagem">
+		<i class="fa-duotone fa-image" style="color:#5827AC;font-size:22px"></i>
+	</button>';
 
-
-		'</button>' . "\r\n\t\t" . '</a>	
-' . "\r\n\t\t" .
+	echo '' . "\r\n\t\t" .
 
 
 
@@ -593,5 +595,91 @@ echo "\r\n" . '</tbody>' . "\r\n" . '</table>';
 			});
 		}
 	</script>
+
+<!-- Modal Editar Imagem -->
+<div id="imgModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.6);align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:12px;padding:28px;width:100%;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,.25);">
+        <h3 style="margin:0 0 16px;font-size:1.1rem;font-weight:700;color:#374151;">📷 Editar Imagem da Campanha</h3>
+        <img id="imgPreview" src="" alt="Preview" style="width:100%;height:200px;object-fit:cover;border-radius:8px;margin-bottom:16px;display:none;">
+        <form id="imgUploadForm" enctype="multipart/form-data">
+            <input type="hidden" id="imgProductId" name="product_id" value="">
+            <input type="file" id="imgInput" name="img" accept="image/jpeg,image/png"
+                style="width:100%;padding:10px;border:2px dashed #7e3af2;border-radius:8px;margin-bottom:16px;cursor:pointer;">
+        </form>
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+            <button onclick="closeImgModal()" style="padding:8px 20px;border:1px solid #d1d5db;border-radius:8px;background:#fff;cursor:pointer;font-size:.9rem;">Cancelar</button>
+            <button onclick="submitImgUpload()" id="imgSubmitBtn" style="padding:8px 20px;background:#7e3af2;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.9rem;font-weight:600;">Salvar Imagem</button>
+        </div>
+        <p id="imgMsg" style="margin-top:12px;font-size:.85rem;color:#374151;text-align:center;"></p>
+    </div>
+</div>
+
+<script>
+function openImgModal(productId) {
+    document.getElementById('imgProductId').value = productId;
+    document.getElementById('imgInput').value = '';
+    document.getElementById('imgPreview').style.display = 'none';
+    document.getElementById('imgMsg').textContent = '';
+    document.getElementById('imgModal').style.display = 'flex';
+}
+
+function closeImgModal() {
+    document.getElementById('imgModal').style.display = 'none';
+}
+
+document.getElementById('imgInput').addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const preview = document.getElementById('imgPreview');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+});
+
+function submitImgUpload() {
+    const file = document.getElementById('imgInput').files[0];
+    if (!file) { alert('Selecione uma imagem primeiro.'); return; }
+
+    const btn = document.getElementById('imgSubmitBtn');
+    const msg = document.getElementById('imgMsg');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+    msg.textContent = '';
+
+    const form = document.getElementById('imgUploadForm');
+    const data = new FormData(form);
+
+    $.ajax({
+        url: _base_url_ + 'class/Main.php?action=update_product_image',
+        method: 'POST',
+        data: data,
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: function(resp) {
+            try { resp = typeof resp === 'string' ? JSON.parse(resp) : resp; } catch(e) {}
+            if (resp && resp.status === 'success') {
+                msg.style.color = '#059669';
+                msg.textContent = '✅ ' + resp.msg;
+                setTimeout(function() { closeImgModal(); location.reload(); }, 1200);
+            } else {
+                msg.style.color = '#dc2626';
+                msg.textContent = '❌ ' + (resp.msg || 'Erro ao enviar.');
+                btn.disabled = false;
+                btn.textContent = 'Salvar Imagem';
+            }
+        },
+        error: function() {
+            msg.style.color = '#dc2626';
+            msg.textContent = '❌ Erro na requisição.';
+            btn.disabled = false;
+            btn.textContent = 'Salvar Imagem';
+        }
+    });
+}
+</script>
 
 </html>

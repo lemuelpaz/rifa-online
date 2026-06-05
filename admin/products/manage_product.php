@@ -1825,10 +1825,14 @@ if (isset($_GET['id']) && 0 < $_GET['id']) {
                 },
                 success: function(resp) {
                     if (typeof resp == 'object' && resp.status == 'success') {
+                        // DEBUG TEMPORÁRIO - mostrar resultado do upload de imagem
+                        if (resp.img_debug) {
+                            alert('IMG DEBUG: ' + resp.img_debug);
+                        }
                         $('#openModal').click();
                         setTimeout(function() {
                             location.replace('./?page=products/manage_product&id=' + resp.pid);
-                        }, 1000);
+                        }, 3000);
                     } else if (resp.status == 'failed' && !!resp.msg) {
                         alert(resp.msg);
                     } else {
