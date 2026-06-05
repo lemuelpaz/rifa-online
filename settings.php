@@ -253,6 +253,9 @@ function validate_image($file)
     global $_settings;
 
     if (!empty($file)) {
+        if (strpos($file, 'data:image') === 0) {
+            return $file;
+        }
         $ex = explode('?', $file);
         $file = $ex[0];
         $ts = (isset($ex[1]) ? '?' . $ex[1] : '');

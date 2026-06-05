@@ -50,63 +50,49 @@ class Main extends DBConnection
             return json_encode($resp);
         }
 
-        $img_path = 'uploads/campanhas';
-        if (!is_dir(BASE_APP . $img_path)) {
-            mkdir(BASE_APP . $img_path, 0755, true);
-        }
-
-        if ($_FILES['img']['type'] === 'image/jpeg') {
-            $src = imagecreatefromjpeg($_FILES['img']['tmp_name']);
-        } else {
-            $src = imagecreatefrompng($_FILES['img']['tmp_name']);
-        }
+        $mime = $_FILES['img']['type'];
+        $src  = $mime === 'image/jpeg'
+            ? imagecreatefromjpeg($_FILES['img']['tmp_name'])
+            : imagecreatefrompng($_FILES['img']['tmp_name']);
 
         if (!$src) {
             $resp['msg'] = 'Imagem inválida ou corrompida.';
             return json_encode($resp);
         }
 
-        // Redimensiona mantendo proporção, corta centro para 600x600
+        // Redimensiona e corta para 600x600
         list($w, $h) = getimagesize($_FILES['img']['tmp_name']);
         $ratio = $w / $h;
         if ($ratio > 1) { $tw = (int)(600 * $ratio); $th = 600; }
         else             { $tw = 600; $th = (int)(600 / $ratio); }
 
-        $resized  = imagecreatetruecolor($tw, $th);
+        $resized = imagecreatetruecolor($tw, $th);
         imagecopyresampled($resized, $src, 0, 0, 0, 0, $tw, $th, $w, $h);
-        $cropped  = imagecrop($resized, ['x' => (int)(($tw - 600) / 2), 'y' => (int)(($th - 600) / 2), 'width' => 600, 'height' => 600]);
+        $cropped = imagecrop($resized, ['x' => (int)(($tw - 600) / 2), 'y' => (int)(($th - 600) / 2), 'width' => 600, 'height' => 600]);
         if (!$cropped) $cropped = $resized;
 
-        // Nome único do arquivo
-        $ext   = $_FILES['img']['type'] === 'image/jpeg' ? 'jpg' : 'png';
-        $fname = $img_path . '/produto_' . $pid . '_' . time() . '.' . $ext;
-
-        if ($ext === 'jpg') {
-            $ok = imagejpeg($cropped, BASE_APP . $fname, 90);
-        } else {
-            $ok = imagepng($cropped, BASE_APP . $fname, 8);
-        }
+        // Converte para base64 e salva direto no banco (sem depender do disco)
+        imagesavealpha($cropped, true);
+        ob_start();
+        if ($mime === 'image/jpeg') { imagejpeg($cropped, null, 90); }
+        else                        { imagepng($cropped, null, 6);   }
+        $base64   = 'data:' . $mime . ';base64,' . base64_encode(ob_get_clean());
 
         imagedestroy($src);
         imagedestroy($resized);
         if ($cropped !== $resized) imagedestroy($cropped);
 
-        if (!$ok) {
-            $resp['msg'] = 'Falha ao salvar o arquivo no servidor.';
-            return json_encode($resp);
-        }
-
-        $path_db  = $fname . '?v=' . time();
-        $saved    = $this->conn->query(
-            "UPDATE product_list SET image_path = '" . $path_db . "' WHERE id = " . $pid
+        $safe  = $this->conn->real_escape_string($base64);
+        $saved = $this->conn->query(
+            "UPDATE product_list SET image_path = '$safe' WHERE id = $pid"
         );
 
         if ($saved) {
-            $resp['status']     = 'success';
-            $resp['msg']        = 'Imagem atualizada com sucesso!';
-            $resp['image_url']  = BASE_URL . $fname . '?v=' . time();
+            $resp['status']    = 'success';
+            $resp['msg']       = 'Imagem atualizada com sucesso!';
+            $resp['image_url'] = $base64;
         } else {
-            $resp['msg'] = 'Imagem salva mas falha ao atualizar banco: ' . $this->conn->error;
+            $resp['msg'] = 'Falha ao atualizar banco: ' . $this->conn->error;
         }
 
         return json_encode($resp);

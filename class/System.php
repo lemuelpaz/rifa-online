@@ -268,139 +268,73 @@ class System extends DBConnection
             }
         }
 
+        // Converte recurso GD para string base64 (salva no banco, sem depender do disco)
+        $gdToBase64 = function($src, string $mime): string {
+            imagesavealpha($src, true);
+            ob_start();
+            if ($mime === 'image/jpeg') { imagejpeg($src, null, 90); }
+            else                        { imagepng($src, null, 6);   }
+            return 'data:' . $mime . ';base64,' . base64_encode(ob_get_clean());
+        };
+
+        $saveSystemImage = function(string $field, string $base64): void {
+            $safe = $this->conn->real_escape_string($base64);
+            if (isset($_SESSION['system_info'][$field])) {
+                $this->conn->query("UPDATE system_info SET meta_value = '$safe' WHERE meta_field = '$field'");
+            } else {
+                $this->conn->query("INSERT INTO system_info (meta_field, meta_value) VALUES ('$field', '$safe')");
+            }
+        };
+
         if (!empty($_FILES['img']['tmp_name'])) {
-            $ext = pathinfo($_FILES['img']['name'], PATHINFO_EXTENSION);
-            $fname = 'uploads/logo.png';
             $accept = ['image/jpeg', 'image/png'];
-
-            if (!in_array($_FILES['img']['type'], $accept)) {
-                $err = 'Image file type is invalid';
-            }
-
-            if ($_FILES['img']['type'] == 'image/jpeg') {
-                $uploadfile = imagecreatefromjpeg($_FILES['img']['tmp_name']);
-            } else if ($_FILES['img']['type'] == 'image/png') {
-                $uploadfile = imagecreatefrompng($_FILES['img']['tmp_name']);
-                $uploadfile = imagecropauto($uploadfile, IMG_CROP_SIDES);
-                imagesavealpha($uploadfile, true);
-            }
-
-            if (!$uploadfile) {
-                $err = 'Image is invalid';
-            }
-
-            list($width, $height) = getimagesize($_FILES['img']['tmp_name']);
-            $temp = imagescale($uploadfile, $width, $height);
-
-            if (is_file(BASE_APP . $fname)) {
-                unlink(BASE_APP . $fname);
-            }
-
-            imagesavealpha($temp, true);
-            $upload = imagepng($temp, BASE_APP . $fname);
-
-            if ($upload) {
-                if (isset($_SESSION['system_info']['logo'])) {
-                    $qry = $this->conn->query('UPDATE system_info set meta_value = \'' . $fname . '?v=' . time() . '\' where meta_field = \'logo\' ');
-
-                    if (is_file(BASE_APP . $_SESSION['system_info']['logo'])) {
-                        unlink(BASE_APP . $_SESSION['system_info']['logo']);
-                    }
-                } else {
-                    $qry = $this->conn->query('INSERT into system_info set meta_value = \'' . $fname . '\',meta_field = \'logo\' ');
+            $mime   = $_FILES['img']['type'];
+            if (in_array($mime, $accept)) {
+                $src  = $mime === 'image/jpeg'
+                    ? imagecreatefromjpeg($_FILES['img']['tmp_name'])
+                    : imagecreatefrompng($_FILES['img']['tmp_name']);
+                if ($src) {
+                    list($w, $h) = getimagesize($_FILES['img']['tmp_name']);
+                    $temp = imagescale($src, $w, $h);
+                    $saveSystemImage('logo', $gdToBase64($temp, $mime));
+                    imagedestroy($src);
+                    imagedestroy($temp);
                 }
             }
-
-            imagedestroy($temp);
         }
 
         if (!empty($_FILES['favicon']['tmp_name'])) {
-            $ext = pathinfo($_FILES['favicon']['name'], PATHINFO_EXTENSION);
-            $fname = 'uploads/favicon.png';
             $accept = ['image/jpeg', 'image/png'];
-
-            if (!in_array($_FILES['favicon']['type'], $accept)) {
-                $err = 'Image file type is invalid';
-            }
-
-            if ($_FILES['favicon']['type'] == 'image/jpeg') {
-                $uploadfile = imagecreatefromjpeg($_FILES['favicon']['tmp_name']);
-            } else if ($_FILES['favicon']['type'] == 'image/png') {
-                $uploadfile = imagecreatefrompng($_FILES['favicon']['tmp_name']);
-                imagealphablending($uploadfile, false);
-                imagesavealpha($uploadfile, true);
-            }
-
-            if (!$uploadfile) {
-                $err = 'Image is invalid';
-            }
-
-            list($width, $height) = getimagesize($_FILES['favicon']['tmp_name']);
-            $temp = imagescale($uploadfile, $width, $height);
-
-            if (is_file(BASE_APP . $fname)) {
-                unlink(BASE_APP . $fname);
-            }
-
-            imagesavealpha($temp, true);
-            $upload = imagepng($temp, BASE_APP . $fname);
-
-            if ($upload) {
-                if (isset($_SESSION['system_info']['favicon'])) {
-                    $qry = $this->conn->query('UPDATE system_info set meta_value = \'' . $fname . '?v=' . time() . '\' where meta_field = \'favicon\' ');
-
-                    if (is_file(BASE_APP . $_SESSION['system_info']['favicon'])) {
-                        unlink(BASE_APP . $_SESSION['system_info']['favicon']);
-                    }
-                } else {
-                    $qry = $this->conn->query('INSERT into system_info set meta_value = \'' . $fname . '\',meta_field = \'favicon\' ');
+            $mime   = $_FILES['favicon']['type'];
+            if (in_array($mime, $accept)) {
+                $src  = $mime === 'image/jpeg'
+                    ? imagecreatefromjpeg($_FILES['favicon']['tmp_name'])
+                    : imagecreatefrompng($_FILES['favicon']['tmp_name']);
+                if ($src) {
+                    list($w, $h) = getimagesize($_FILES['favicon']['tmp_name']);
+                    $temp = imagescale($src, $w, $h);
+                    $saveSystemImage('favicon', $gdToBase64($temp, $mime));
+                    imagedestroy($src);
+                    imagedestroy($temp);
                 }
             }
-
-            imagedestroy($temp);
         }
 
         if (!empty($_FILES['cover']['tmp_name'])) {
-            $ext = pathinfo($_FILES['cover']['name'], PATHINFO_EXTENSION);
-            $fname = 'uploads/cover.png';
             $accept = ['image/jpeg', 'image/png'];
-
-            if (!in_array($_FILES['cover']['type'], $accept)) {
-                $err = 'Image file type is invalid';
-            }
-
-            if ($_FILES['cover']['type'] == 'image/jpeg') {
-                $uploadfile = imagecreatefromjpeg($_FILES['cover']['tmp_name']);
-            } else if ($_FILES['cover']['type'] == 'image/png') {
-                $uploadfile = imagecreatefrompng($_FILES['cover']['tmp_name']);
-            }
-
-            if (!$uploadfile) {
-                $err = 'Image is invalid';
-            }
-
-            list($width, $height) = getimagesize($_FILES['cover']['tmp_name']);
-            $temp = imagescale($uploadfile, $width, $height);
-
-            if (is_file(BASE_APP . $fname)) {
-                unlink(BASE_APP . $fname);
-            }
-
-            $upload = imagepng($temp, BASE_APP . $fname);
-
-            if ($upload) {
-                if (isset($_SESSION['system_info']['cover'])) {
-                    $qry = $this->conn->query('UPDATE system_info set meta_value = \'' . $fname . '?v=' . time() . '\' where meta_field = \'cover\' ');
-
-                    if (is_file(BASE_APP . $_SESSION['system_info']['cover'])) {
-                        unlink(BASE_APP . $_SESSION['system_info']['cover']);
-                    }
-                } else {
-                    $qry = $this->conn->query('INSERT into system_info set meta_value = \'' . $fname . '\',meta_field = \'cover\' ');
+            $mime   = $_FILES['cover']['type'];
+            if (in_array($mime, $accept)) {
+                $src  = $mime === 'image/jpeg'
+                    ? imagecreatefromjpeg($_FILES['cover']['tmp_name'])
+                    : imagecreatefrompng($_FILES['cover']['tmp_name']);
+                if ($src) {
+                    list($w, $h) = getimagesize($_FILES['cover']['tmp_name']);
+                    $temp = imagescale($src, $w, $h);
+                    $saveSystemImage('cover', $gdToBase64($temp, $mime));
+                    imagedestroy($src);
+                    imagedestroy($temp);
                 }
             }
-
-            imagedestroy($temp);
         }
         if (isset($_FILES['banners']) && 0 < count($_FILES['banners']['tmp_name'])) {
             $err = '';
