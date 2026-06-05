@@ -114,7 +114,7 @@ class DBConnection
             $user = $p['user'];
             $pass = $p['pass'];
             $name = ltrim($p['path'], '/');
-            $dsn  = "pgsql:host={$host};port={$port};dbname={$name}";
+            $dsn  = "pgsql:host={$host};port={$port};dbname={$name};sslmode=require";
         } else {
             $port = defined('DB_PORT') ? DB_PORT : 5432;
             $dsn  = 'pgsql:host=' . DB_SERVER . ';port=' . $port . ';dbname=' . DB_NAME;
