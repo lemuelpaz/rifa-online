@@ -27,6 +27,8 @@ class System extends DBConnection
         $sql = 'SELECT * FROM system_info';
         $qry = $this->conn->query($sql);
 
+        if (!$qry || $qry->num_rows === 0) return;
+
         while ($row = $qry->fetch_assoc()) {
             $_SESSION['system_info'][$row['meta_field']] = $row['meta_value'];
         }
@@ -36,6 +38,8 @@ class System extends DBConnection
     {
         $sql = 'SELECT * FROM system_info';
         $qry = $this->conn->query($sql);
+
+        if (!$qry || $qry->num_rows === 0) return;
 
         while ($row = $qry->fetch_assoc()) {
             if (isset($_SESSION['system_info'][$row['meta_field']])) {
