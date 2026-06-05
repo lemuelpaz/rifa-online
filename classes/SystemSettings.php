@@ -227,7 +227,7 @@ class SystemSettings extends DBConnection
 
 			if ($upload) {
 				if (isset($_SESSION['system_info']['logo'])) {
-					$qry = $this->conn->query('UPDATE system_info set meta_value = CONCAT(\'' . $fname . '\', \'?v=\',unix_timestamp(CURRENT_TIMESTAMP)) where meta_field = \'logo\' ');
+					$qry = $this->conn->query('UPDATE system_info set meta_value = \'' . $fname . '?v=' . time() . '\' where meta_field = \'logo\' ');
 
 					if (is_file(BASE_APP . $_SESSION['system_info']['logo'])) {
 						unlink(BASE_APP . $_SESSION['system_info']['logo']);
@@ -275,7 +275,7 @@ class SystemSettings extends DBConnection
 
 			if ($upload) {
 				if (isset($_SESSION['system_info']['favicon'])) {
-					$qry = $this->conn->query('UPDATE system_info set meta_value = CONCAT(\'' . $fname . '\', \'?v=\',unix_timestamp(CURRENT_TIMESTAMP)) where meta_field = \'favicon\' ');
+					$qry = $this->conn->query('UPDATE system_info set meta_value = \'' . $fname . '?v=' . time() . '\' where meta_field = \'favicon\' ');
 
 					if (is_file(BASE_APP . $_SESSION['system_info']['favicon'])) {
 						unlink(BASE_APP . $_SESSION['system_info']['favicon']);
@@ -320,7 +320,7 @@ class SystemSettings extends DBConnection
 
 			if ($upload) {
 				if (isset($_SESSION['system_info']['cover'])) {
-					$qry = $this->conn->query('UPDATE system_info set meta_value = CONCAT(\'' . $fname . '\', \'?v=\',unix_timestamp(CURRENT_TIMESTAMP)) where meta_field = \'cover\' ');
+					$qry = $this->conn->query('UPDATE system_info set meta_value = \'' . $fname . '?v=' . time() . '\' where meta_field = \'cover\' ');
 
 					if (is_file(BASE_APP . $_SESSION['system_info']['cover'])) {
 						unlink(BASE_APP . $_SESSION['system_info']['cover']);

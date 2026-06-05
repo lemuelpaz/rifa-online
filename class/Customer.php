@@ -105,7 +105,7 @@ class Customer extends DBConnection
                     $upload = imagepng($temp, BASE_APP . $fname);
 
                     if ($upload) {
-                        $this->conn->query('UPDATE `users` set `avatar` = CONCAT(\'' . $fname . '\', \'?v=\',unix_timestamp(CURRENT_TIMESTAMP)) where id = \'' . $id . '\'');
+                        $this->conn->query('UPDATE `users` set `avatar` = \'' . $fname . '?v=' . time() . '\' where id = \'' . $id . '\'');
 
                         if ($id == $this->settings->userdata('id')) {
                             $this->settings->set_userdata('avatar', $fname . '?v=' . time());
@@ -170,7 +170,7 @@ class Customer extends DBConnection
                     $upload = imagepng($temp, BASE_APP . $fname);
 
                     if ($upload) {
-                        $this->conn->query('UPDATE `users` set `avatar` = CONCAT(\'' . $fname . '\', \'?v=\',unix_timestamp(CURRENT_TIMESTAMP)) where id = \'' . $id . '\'');
+                        $this->conn->query('UPDATE `users` set `avatar` = \'' . $fname . '?v=' . time() . '\' where id = \'' . $id . '\'');
 
                         if ($id == $this->settings->userdata('id')) {
                             $this->settings->set_userdata('avatar', $fname . '?v=' . time());
@@ -497,7 +497,7 @@ class Customer extends DBConnection
                 $upload = imagepng($temp, BASE_APP . $fname);
 
                 if ($upload) {
-                    $this->conn->query('UPDATE `customer_list` set `avatar` = CONCAT(\'' . $fname . '\', \'?v=\',unix_timestamp(CURRENT_TIMESTAMP)) where id = \'' . $uid . '\'');
+                    $this->conn->query('UPDATE `customer_list` set `avatar` = \'' . $fname . '?v=' . time() . '\' where id = \'' . $uid . '\'');
                 }
 
                 imagedestroy($temp);

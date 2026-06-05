@@ -722,11 +722,7 @@ class Main extends DBConnection
 
                         if ($upload) {
                             $this->conn->query(
-                                'UPDATE product_list SET image_path = CONCAT(\'' .
-                                    $spath .
-                                    '\', \'?v=\', UNIX_TIMESTAMP(CURRENT_TIMESTAMP)) WHERE id = \'' .
-                                    $pid .
-                                    '\' '
+                                'UPDATE product_list SET image_path = \'' . $spath . '?v=' . time() . '\' WHERE id = \'' . $pid . '\''
                             );
                         }
 
