@@ -47,8 +47,12 @@ class PgConnection
 
     private function translate(string $sql): string
     {
+        // Backticks → sem aspas (nomes lowercase funcionam no PG)
         $sql = preg_replace('/`([^`]+)`/', '$1', $sql);
+        // REGEXP → ~ (operador regex do PostgreSQL)
         $sql = preg_replace('/\bREGEXP\b/i', '~', $sql);
+        // RAND() → RANDOM() (MySQL → PostgreSQL)
+        $sql = preg_replace('/\bRAND\s*\(\s*\)/i', 'RANDOM()', $sql);
         return $sql;
     }
 
