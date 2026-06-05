@@ -470,7 +470,7 @@ if (0 < $enable_ranking) {
                 $id .
                 " AND o.status = 2" .
                 "\r\n" .
-                "            GROUP BY o.customer_id" .
+                "            GROUP BY o.customer_id, c.firstname" .
                 "\r\n" .
                 "            ORDER BY total_quantity DESC" .
                 "\r\n" .
@@ -498,7 +498,7 @@ if (0 < $enable_ranking) {
                 $today .
                 ' 23:59:59\'' .
                 "\r\n" .
-                "            GROUP BY o.customer_id" .
+                "            GROUP BY o.customer_id, c.firstname" .
                 "\r\n" .
                 "            ORDER BY total_quantity DESC" .
                 "\r\n" .

@@ -917,7 +917,7 @@ if ($min_purchase > $available) {
         FROM order_list o
         INNER JOIN customer_list c ON o.customer_id = c.id
         WHERE o.product_id = {$id} AND o.status = 2
-        GROUP BY o.customer_id
+        GROUP BY o.customer_id, c.firstname
         ORDER BY total_quantity DESC
         LIMIT {$ranking_qty}
         ");

@@ -1741,7 +1741,7 @@ $stmt->close();
                 foreach ($draw_winner as $qty_index => $name) {
                     foreach ($draw_number as $amount_index => $number) {
                         $query = $conn->query('SELECT CONCAT(firstname, \' \', lastname) as name, avatar FROM customer_list WHERE phone = \'' . $name . '\'');
-                        $rowCustomer = $query->fetch_assoc();
+                        $rowCustomer = $query ? $query->fetch_assoc() : [];
 
                         if ($qty_index === $amount_index) {
                             $winners[$qty_index] = [
@@ -2195,19 +2195,19 @@ $stmt->close();
                         $today = date('Y-m-d');
                         $hoje = date('Y-m-d H:i:s');
                         if ($ranking_type == 1 && $enable_ranking_definido == 0) {
-                            $requests = $conn->query("\r\n" . ' SELECT c.firstname, SUM(o.quantity) AS total_quantity' . "\r\n" . ' FROM order_list o' . "\r\n" . ' INNER JOIN customer_list c ON o.customer_id = c.id' . "\r\n" . ' WHERE o.product_id = ' . $id . ' AND o.status = 2' . "\r\n" . ' GROUP BY o.customer_id' . "\r\n" . ' ORDER BY total_quantity DESC' . "\r\n" . ' LIMIT ' . $ranking_qty . "\r\n" . ' ');
+                            $requests = $conn->query("\r\n" . ' SELECT c.firstname, SUM(o.quantity) AS total_quantity' . "\r\n" . ' FROM order_list o' . "\r\n" . ' INNER JOIN customer_list c ON o.customer_id = c.id' . "\r\n" . ' WHERE o.product_id = ' . $id . ' AND o.status = 2' . "\r\n" . ' GROUP BY o.customer_id, c.firstname' . "\r\n" . ' ORDER BY total_quantity DESC' . "\r\n" . ' LIMIT ' . $ranking_qty . "\r\n" . ' ');
                         } else if ($enable_ranking_definido == 1) {
 
                             if ($ranking_ini != '0000-00-00 00:00:00' && $ranking_fim != '0000-00-00 00:00:00') {
-                                $requests = $conn->query("\r\n" . ' SELECT c.firstname, SUM(o.quantity) AS total_quantity' . "\r\n" . ' FROM order_list o' . "\r\n" . ' INNER JOIN customer_list c ON o.customer_id = c.id' . "\r\n" . ' WHERE o.product_id = ' . $id . ' AND o.status = 2' . "\r\n" . ' AND o.date_created >= \'' . $ranking_ini . '\' AND o.date_created <= \'' . $ranking_fim . '\'' . "\r\n" . ' GROUP BY o.customer_id' . "\r\n" . ' ORDER BY total_quantity DESC' . "\r\n" . ' LIMIT ' . $ranking_qty . "\r\n" . ' ');
+                                $requests = $conn->query("\r\n" . ' SELECT c.firstname, SUM(o.quantity) AS total_quantity' . "\r\n" . ' FROM order_list o' . "\r\n" . ' INNER JOIN customer_list c ON o.customer_id = c.id' . "\r\n" . ' WHERE o.product_id = ' . $id . ' AND o.status = 2' . "\r\n" . ' AND o.date_created >= \'' . $ranking_ini . '\' AND o.date_created <= \'' . $ranking_fim . '\'' . "\r\n" . ' GROUP BY o.customer_id, c.firstname' . "\r\n" . ' ORDER BY total_quantity DESC' . "\r\n" . ' LIMIT ' . $ranking_qty . "\r\n" . ' ');
                             }
                         } else {
-                            $requests = $conn->query("\r\n" . ' SELECT c.firstname, SUM(o.quantity) AS total_quantity' . "\r\n" . ' FROM order_list o' . "\r\n" . ' INNER JOIN customer_list c ON o.customer_id = c.id' . "\r\n" . ' WHERE o.product_id = ' . $id . ' AND o.status = 2' . "\r\n" . ' AND o.date_created BETWEEN \'' . $today . ' 00:00:00\' AND \'' . $today . ' 23:59:59\'' . "\r\n" . ' GROUP BY o.customer_id' . "\r\n" . ' ORDER BY total_quantity DESC' . "\r\n" . ' LIMIT ' . $ranking_qty . "\r\n" . ' ');
+                            $requests = $conn->query("\r\n" . ' SELECT c.firstname, SUM(o.quantity) AS total_quantity' . "\r\n" . ' FROM order_list o' . "\r\n" . ' INNER JOIN customer_list c ON o.customer_id = c.id' . "\r\n" . ' WHERE o.product_id = ' . $id . ' AND o.status = 2' . "\r\n" . ' AND o.date_created BETWEEN \'' . $today . ' 00:00:00\' AND \'' . $today . ' 23:59:59\'' . "\r\n" . ' GROUP BY o.customer_id, c.firstname' . "\r\n" . ' ORDER BY total_quantity DESC' . "\r\n" . ' LIMIT ' . $ranking_qty . "\r\n" . ' ');
                         }
 
                         $count = 0;
 
-                        while ($row = $requests->fetch_assoc()) {
+                        while ($requests && $row = $requests->fetch_assoc()) {
                             ++$count;
 
                             if ($count == 1) {

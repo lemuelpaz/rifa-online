@@ -257,9 +257,9 @@ if (0 < $enable_ranking) {
     $today = date('Y-m-d');
 
     if ($ranking_type == 1) {
-        $requests = $conn->query("\r\n" . '            SELECT c.firstname, SUM(o.quantity) AS total_quantity' . "\r\n" . '            FROM order_list o' . "\r\n" . '            INNER JOIN customer_list c ON o.customer_id = c.id' . "\r\n" . '            WHERE o.product_id = ' . $id . ' AND o.status = 2' . "\r\n" . '            GROUP BY o.customer_id' . "\r\n" . '            ORDER BY total_quantity DESC' . "\r\n" . '            LIMIT ' . $ranking_qty . "\r\n" . '         ');
+        $requests = $conn->query("\r\n" . '            SELECT c.firstname, SUM(o.quantity) AS total_quantity' . "\r\n" . '            FROM order_list o' . "\r\n" . '            INNER JOIN customer_list c ON o.customer_id = c.id' . "\r\n" . '            WHERE o.product_id = ' . $id . ' AND o.status = 2' . "\r\n" . '            GROUP BY o.customer_id, c.firstname' . "\r\n" . '            ORDER BY total_quantity DESC' . "\r\n" . '            LIMIT ' . $ranking_qty . "\r\n" . '         ');
     } else {
-        $requests = $conn->query("\r\n" . '            SELECT c.firstname, SUM(o.quantity) AS total_quantity' . "\r\n" . '            FROM order_list o' . "\r\n" . '            INNER JOIN customer_list c ON o.customer_id = c.id' . "\r\n" . '            WHERE o.product_id = ' . $id . ' AND o.status = 2' . "\r\n" . '            AND o.date_created BETWEEN \'' . $today . ' 00:00:00\' AND \'' . $today . ' 23:59:59\'' . "\r\n" . '            GROUP BY o.customer_id' . "\r\n" . '            ORDER BY total_quantity DESC' . "\r\n" . '            LIMIT ' . $ranking_qty . "\r\n" . '         ');
+        $requests = $conn->query("\r\n" . '            SELECT c.firstname, SUM(o.quantity) AS total_quantity' . "\r\n" . '            FROM order_list o' . "\r\n" . '            INNER JOIN customer_list c ON o.customer_id = c.id' . "\r\n" . '            WHERE o.product_id = ' . $id . ' AND o.status = 2' . "\r\n" . '            AND o.date_created BETWEEN \'' . $today . ' 00:00:00\' AND \'' . $today . ' 23:59:59\'' . "\r\n" . '            GROUP BY o.customer_id, c.firstname' . "\r\n" . '            ORDER BY total_quantity DESC' . "\r\n" . '            LIMIT ' . $ranking_qty . "\r\n" . '         ');
     }
 
     $count = 0;
