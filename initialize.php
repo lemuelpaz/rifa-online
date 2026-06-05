@@ -30,7 +30,8 @@ if ($date_expirate <= date('Y-m-d')) {
         'BASE_APP'   => $BASE_PATH,
         'base_app'   => $BASE_PATH,
         'DB_SERVER'  => getenv('DB_SERVER')   ?: 'localhost',
-        'DB_USERNAME'=> getenv('DB_USERNAME') ?: 'root',
+        'DB_PORT'    => getenv('DB_PORT')     ?: '5432',
+        'DB_USERNAME'=> getenv('DB_USERNAME') ?: 'postgres',
         'DB_PASSWORD'=> getenv('DB_PASSWORD') ?: '',
         'DB_NAME'    => getenv('DB_NAME')     ?: 'rifa',
     ];

@@ -1,3 +1,9 @@
+databases:
+  - name: rifa-db
+    plan: free
+    databaseName: rifa
+    user: rifa_user
+
 services:
   - type: web
     name: rifa-online
@@ -9,10 +15,22 @@ services:
       - key: BASE_URL
         sync: false
       - key: DB_SERVER
-        sync: false
+        fromDatabase:
+          name: rifa-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: rifa-db
+          property: port
       - key: DB_USERNAME
-        sync: false
+        fromDatabase:
+          name: rifa-db
+          property: user
       - key: DB_PASSWORD
-        sync: false
+        fromDatabase:
+          name: rifa-db
+          property: password
       - key: DB_NAME
-        sync: false
+        fromDatabase:
+          name: rifa-db
+          property: database
