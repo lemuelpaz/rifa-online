@@ -96,13 +96,17 @@ class DBConnection
             require_once __DIR__ . '/../initialize.php';
         }
 
-        $database_url = getenv('DATABASE_URL');
+        // Tenta todas as formas de ler variáveis de ambiente (Docker/Render)
+        $database_url = getenv('DATABASE_URL')
+            ?: ($_ENV['DATABASE_URL']    ?? '')
+            ?: ($_SERVER['DATABASE_URL'] ?? '');
+
         if ($database_url) {
             $p    = parse_url($database_url);
             $host = $p['host'];
             $port = $p['port'] ?? 5432;
             $user = $p['user'];
-            $pass = $p['pass'];
+            $pass = $p['pass'] ?? '';
             $name = ltrim($p['path'], '/');
             $dsn  = "pgsql:host={$host};port={$port};dbname={$name}";
         } else {

@@ -102,8 +102,11 @@ class DBConnection
             require_once __DIR__ . '/../initialize.php';
         }
 
-        // Suporta DATABASE_URL (formato do Render)
-        $database_url = getenv('DATABASE_URL');
+        // Tenta todas as formas de ler variáveis de ambiente (Docker/Render)
+        $database_url = getenv('DATABASE_URL')
+            ?: ($_ENV['DATABASE_URL']    ?? '')
+            ?: ($_SERVER['DATABASE_URL'] ?? '');
+
         if ($database_url) {
             $p    = parse_url($database_url);
             $host = $p['host'];
