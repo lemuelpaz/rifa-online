@@ -47,9 +47,9 @@ $totalResults = $conn->query('SELECT o.* FROM order_list o ' . $where)->num_rows
 $totalPages = ceil($totalResults / $perPage);
 $g_total = 0;
 $i = 1;
-$requests = $conn->query("\r\n" . '                SELECT c.firstname, c.lastname, c.phone, SUM(o.quantity) AS total_quantity, SUM(o.total_amount) AS total_amount, ' . "\r\n" . '                o.code, CONCAT(\' \', o.product_name) AS product' . "\r\n" . '                FROM order_list o' . "\r\n" . '                INNER JOIN customer_list c ON o.customer_id = c.id' . "\r\n" . '                ' . $where . ' AND o.status = 2' . "\r\n" . '                GROUP BY o.customer_id' . "\r\n" . '                ORDER BY total_quantity DESC' . "\r\n" . '                LIMIT ' . $perPage . ' OFFSET ' . $offset . "\r\n" . '                ');
+$requests = $conn->query("\r\n" . '                SELECT c.firstname, c.lastname, c.phone, SUM(o.quantity) AS total_quantity, SUM(o.total_amount) AS total_amount, ' . "\r\n" . '                o.code, CONCAT(\' \', o.product_name) AS product' . "\r\n" . '                FROM order_list o' . "\r\n" . '                INNER JOIN customer_list c ON o.customer_id = c.id' . "\r\n" . '                ' . $where . ' AND o.status = 2' . "\r\n" . '                GROUP BY o.customer_id, c.firstname, c.lastname, c.phone, o.code, o.product_name' . "\r\n" . '                ORDER BY total_quantity DESC' . "\r\n" . '                LIMIT ' . $perPage . ' OFFSET ' . $offset . "\r\n" . '                ');
 
-while ($row = $requests->fetch_assoc()) {
+while ($requests && $row = $requests->fetch_assoc()) {
 	echo '                <tr class="text-gray-700 dark:text-gray-400">' . "\r\n" . '                    <td class="px-4 py-3">';
 	echo $row['firstname'];
 	echo ' ';

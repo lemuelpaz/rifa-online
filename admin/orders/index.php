@@ -541,9 +541,9 @@ if ($product_id) {
         
         $totalPages = $records / $perPage;
         $totalResults = $conn->query("SELECT id FROM order_list")->num_rows;
-        
 
-        while ($row = $qry->fetch_assoc()) {
+
+        while ($qry && $row = $qry->fetch_assoc()) {
             $i++;
         ?>
                         <tr class="text-gray-700 dark:text-gray-400">

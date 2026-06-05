@@ -140,8 +140,8 @@ $search_type = isset($_GET['search_type']) ? $_GET['search_type'] : '';
             $totalPageView = $conn->query('
 				SELECT pl.name AS product_name, pv.origin, COUNT(*) AS total_views
 				FROM page_view pv
-				LEFT JOIN product_list pl ON pv.product_id = pl.id
-				GROUP BY pv.product_id, pv.origin
+				LEFT JOIN product_list pl ON NULLIF(pv.product_id, \'\')::integer = pl.id
+				GROUP BY pl.name, pv.product_id, pv.origin
 			');
 
             // Consulta para as visualizações Pixel agrupadas por produto
@@ -182,7 +182,7 @@ $search_type = isset($_GET['search_type']) ? $_GET['search_type'] : '';
                             <?php
                             // Agrupando os totais de visualizações por produto e origem
                             $views = [];
-                            while ($row = $totalPageView->fetch_assoc()) {
+                            while ($totalPageView && $row = $totalPageView->fetch_assoc()) {
                                 $product_name = (empty($row['product_name'])) ? 'Home' : htmlspecialchars($row['product_name']);
                                 $origin = ($row['origin'] == 2) ? 'Pixel' : 'Normal';
 

@@ -11,7 +11,7 @@ $end_date = (isset($_GET['end_date']) ? $_GET['end_date'] : date('Y-m-d'));
 echo '<style>' . "\r\n" . '.order_numbers{white-space:normal}tr.text-gray-700.dark\\:text-gray-400{vertical-align:text-bottom}.exportar-contatos{max-width:189px;display:inline-block;margin-bottom:10px}@media all and (max-width:40em){.filtro-busca{display:block!important}}span#approve-payment{background:#2271b1;padding:6px;display:inline-block;margin-top:6px;border-radius:4px;color:#fff;cursor:pointer}td.px-4.py-3.text-sm {max-width: 240px;text-wrap: pretty;}@media only screen and (max-width:600px){.fb-2{margin-top:10px;width:100%}}@media only screen and (max-width:600px){.fb-2{margin-top:10px;width:100%}}' . "\r\n" . '</style>' . "\r\n\r\n" . '<main class="h-full pb-16 overflow-y-auto">' . "\r\n" . '    <div class="container grid px-6 mx-auto">' . "\r\n" . '        <h2 class="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">' . "\r\n" . '        Relatórios' . "\r\n" . '        </h2>  ' . "\r\n\r\n" . '        <form action="" id="filter-form" style="margin-bottom:10px" method="GET">' . "\r\n" . '            <div class="flex filtro-busca">' . "\r\n" . '                <select name="product_id" id="product_id" class="mr-2 block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray">' . "\r\n" . '                    <option value="">Todos as campanhas</option>' . "\r\n" . '                    ';
 $qry = $conn->query('SELECT * FROM `product_list`');
 
-while ($row = $qry->fetch_assoc()) {
+while ($qry && $row = $qry->fetch_assoc()) {
 	echo '                        <option value="';
 	echo $row['id'];
 	echo '" ';
@@ -230,7 +230,7 @@ if (!empty($where)) {
 $qry = $conn->query('SELECT o.*' . "\r\n" . '                                FROM `order_list` o' . "\r\n" . '                                INNER JOIN product_list p ON o.product_id = p.id' . "\r\n" . '                                ' . $where . "\r\n" . '                                ORDER BY ABS(UNIX_TIMESTAMP(o.date_created)) DESC' . "\r\n" . '                                LIMIT ' . $perPage . ' OFFSET ' . $offset);
 $totalResults = $conn->query('SELECT o.*' . "\r\n" . '                            FROM `order_list` o' . "\r\n" . '                            INNER JOIN product_list p ON o.product_id = p.id' . "\r\n" . '                            ' . $where . ' ')->num_rows;
 
-while ($row = $qry->fetch_assoc()) {
+while ($qry && $row = $qry->fetch_assoc()) {
 	echo '                        <tr class="text-gray-700 dark:text-gray-400">' . "\r\n" . '                            <td class="px-4 py-3">#';
 	echo $row['id'];
 	echo '</td>          ' . "\r\n" . '                            <td class="px-4 py-3">';

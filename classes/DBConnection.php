@@ -53,7 +53,9 @@ class PgStatement
 
     public function execute(): bool
     {
-        return $this->stmt->execute($this->params);
+        // Converte string vazia para null (PostgreSQL é estrito com tipos)
+        $params = array_map(fn($p) => ($p === '') ? null : $p, $this->params);
+        return $this->stmt->execute($params);
     }
 
     public function get_result(): DBResult
@@ -84,12 +86,16 @@ class PgConnection
         $sql = preg_replace('/\bREGEXP\b/i', '~', $sql);
         // RAND() → RANDOM()
         $sql = preg_replace('/\bRAND\s*\(\s*\)/i', 'RANDOM()', $sql);
+        // UNIX_TIMESTAMP(expr) → EXTRACT(EPOCH FROM expr)::bigint
+        $sql = preg_replace('/\bUNIX_TIMESTAMP\s*\(([^)]+)\)/i', 'EXTRACT(EPOCH FROM $1)::bigint', $sql);
         // FIND_IN_SET(val, col) → val = ANY(string_to_array(col, ','))
         $sql = preg_replace_callback(
             '/FIND_IN_SET\s*\(([^,]+),([^)]+)\)/i',
             fn($m) => trim($m[1]) . ' = ANY(string_to_array(' . trim($m[2]) . ", ','))",
             $sql
         );
+        // LIMIT offset, count → LIMIT count OFFSET offset (sintaxe MySQL)
+        $sql = preg_replace('/\bLIMIT\s+(\d+)\s*,\s*(\d+)/i', 'LIMIT $2 OFFSET $1', $sql);
         return $sql;
     }
 

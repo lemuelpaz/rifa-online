@@ -258,10 +258,10 @@ $totalPages = ceil($totalResults / $perPage);
 
 
 while ($row = $qry->fetch_assoc()) {
-	$qry2 = $conn->query('SELECT SUM(quantity) FROM order_list WHERE product_id = ' . $row['id'] . ' AND status <> 3');
-	$row2 = $qry2->fetch_assoc();
-	$quantityy = $row2['SUM(quantity)'];
-	$percent = ($row2['SUM(quantity)'] * 100) / $row['qty_numbers'];
+	$qry2 = $conn->query('SELECT SUM(quantity) AS qty_sum FROM order_list WHERE product_id = ' . $row['id'] . ' AND status <> 3');
+	$row2 = $qry2 ? $qry2->fetch_assoc() : [];
+	$quantityy = $row2['qty_sum'] ?? 0;
+	$percent = ($quantityy * 100) / max(1, $row['qty_numbers']);
 	$percent = number_format($percent, 2, '.', '');
 	echo "\t\t\t\t" . '<tr class="text-gray-700 dark:text-gray-400">' . "\r\n\t\t\t\t\t" . '<td class="px-4 py-3">' . "\r\n\t\t\t\t\t\t" . '<div class="flex items-center text-sm">' . "\r\n\t\t\t\t\t\t\t" . '<!-- Avatar with inset shadow -->' . "\r\n\t\t\t\t\t\t\t" . '<div' . "\r\n\t\t\t\t\t\t\t" . 'class="relative hidden w-8 h-8 mr-3 rounded-full md:block"' . "\r\n\t\t\t\t\t\t\t" . '>' . "\r\n\t\t\t\t\t\t\t" . '<img' . "\r\n\t\t\t\t\t\t\t" . 'class="object-cover w-full h-full rounded-full"' . "\r\n\t\t\t\t\t\t\t" . 'src="';
 	echo validate_image($row['image_path']);
