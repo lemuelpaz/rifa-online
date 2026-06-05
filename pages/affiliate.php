@@ -462,13 +462,14 @@ if ($saldo < 0) $saldo = 0;
                     <tbody>
                         <?php
                     $uid = intval($uid);
-                        $query = "SELECT o.product_name, o.status, o.total_amount, o.date_created, r.percentage 
-          FROM order_list o 
-          INNER JOIN referral r ON o.referral_id = r.referral_code 
-          WHERE o.status <> 3 AND o.referral_id = '{$_settings->userdata('id')}'";
+                        $affiliate_user_id = intval($_settings->userdata('id'));
+                        $query = "SELECT o.product_name, o.status, o.total_amount, o.date_created, r.percentage
+          FROM order_list o
+          INNER JOIN referral r ON o.referral_id::text = r.referral_code
+          WHERE o.status <> 3 AND o.referral_id = {$affiliate_user_id}";
 
                         $orders = $conn->query($query);
-                        while ($row = $orders->fetch_assoc()) {
+                        while ($orders && $row = $orders->fetch_assoc()) {
                             $status = $row['status'];
                             $product = $row['product_name'];
                             $percentage = $row['percentage'];

@@ -118,8 +118,12 @@ class PgConnection
             $pair = trim($pair);
             $eq   = strpos($pair, '=');
             if ($eq === false) continue;
-            $cols[] = trim(trim(substr($pair, 0, $eq)), '`\'" ');
-            $vals[] = trim(substr($pair, $eq + 1));
+            $col = trim(trim(substr($pair, 0, $eq)), '`\'" ');
+            $val = trim(substr($pair, $eq + 1));
+            // Ignora id='' — SERIAL do PostgreSQL não aceita string vazia
+            if ($col === 'id' && ($val === "''" || $val === "")) continue;
+            $cols[] = $col;
+            $vals[] = $val;
         }
         if (empty($cols)) return $sql;
         return 'INSERT INTO ' . $table . ' (' . implode(', ', $cols) . ') VALUES (' . implode(', ', $vals) . ')';

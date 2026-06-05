@@ -30,13 +30,11 @@ class Users extends DBConnection
 		$data = '';
 
 		foreach ($_POST as $k => $v) {
-			if (!in_array($k, ['id' => true])) {
-				if (!empty($data)) {
-					$data .= ' , ';
-				}
-
-				$data .= ' ' . $k . ' = \'' . $v . '\' ';
+			if ($k === 'id') continue;
+			if (!empty($data)) {
+				$data .= ' , ';
 			}
+			$data .= ' `' . $k . '` = \'' . $v . '\' ';
 		}
 		if (empty($_POST['type']) || empty($_POST['firstname']) || empty($_POST['lastname']) || empty($_POST['email']) || empty($_POST['password']) || empty($_POST['username']) || !$this->settings->userdata('firstname')) {
 			return 3;
