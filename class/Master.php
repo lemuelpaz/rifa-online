@@ -1172,7 +1172,7 @@ class Master extends DBConnection
 					if ($status_affiliate == 1) {
 						$value = $total_amount * $percentage_affiliate;
 						$value = $value / 100;
-						$aff_sql = 'UPDATE referral SET amount_pending = amount_pending + ' . $value . ' WHERE referral_code = ' . $ref;
+						$aff_sql = 'UPDATE referral SET amount_pending = amount_pending + ' . $value . ' WHERE referral_code = \'' . $ref . '\'';
 						$this->conn->query($aff_sql);
 					}
 				}
@@ -1187,7 +1187,7 @@ class Master extends DBConnection
 					if ($status_affiliate == 1) {
 						$value = $total_amount * $percentage_affiliate;
 						$value = $value / 100;
-						$aff_sql = 'UPDATE referral SET amount_pending = amount_pending + ' . $value . ' WHERE referral_code = ' . $ref;
+						$aff_sql = 'UPDATE referral SET amount_pending = amount_pending + ' . $value . ' WHERE referral_code = \'' . $ref . '\'';
 						$this->conn->query($aff_sql);
 					}
 				}
@@ -1202,7 +1202,7 @@ class Master extends DBConnection
 					if ($status_affiliate == 1) {
 						$value = $total_amount * $percentage_affiliate;
 						$value = $value / 100;
-						$aff_sql = 'UPDATE referral SET amount_pending = amount_pending - ' . $value . ' WHERE referral_code = ' . $ref;
+						$aff_sql = 'UPDATE referral SET amount_pending = amount_pending - ' . $value . ' WHERE referral_code = \'' . $ref . '\'';
 						$this->conn->query($aff_sql);
 					}
 				}
@@ -1215,7 +1215,7 @@ class Master extends DBConnection
 					if ($status_affiliate == 1) {
 						$value = $total_amount * $percentage_affiliate;
 						$value = $value / 100;
-						$aff_sql = 'UPDATE referral SET amount_pending = amount_pending - ' . $value . ' WHERE referral_code = ' . $ref;
+						$aff_sql = 'UPDATE referral SET amount_pending = amount_pending - ' . $value . ' WHERE referral_code = \'' . $ref . '\'';
 						$this->conn->query($aff_sql);
 					}
 				}

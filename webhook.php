@@ -63,7 +63,7 @@ if (isset($_GET['notify']) && $_GET['notify'] == 'pixup') {
 
 			if ($ref && isset($status_affiliate) && $status_affiliate == 1) {
 				$value = $total_amount * $percentage_affiliate / 100;
-				$aff_sql = 'UPDATE referral SET amount_pending = amount_pending + ' . $value . ' WHERE referral_code = ' . $ref;
+				$aff_sql = 'UPDATE referral SET amount_pending = amount_pending + ' . $value . ' WHERE referral_code = \'' . $ref . '\'';
 				$conn->query($aff_sql);
 			}
 
@@ -142,7 +142,7 @@ if (isset($_GET['notify']) == 'ondapay') {
 						if ($status_affiliate == 1) {
 							$value = $total_amount * $percentage_affiliate;
 							$value = $value / 100;
-							$aff_sql = 'UPDATE referral SET amount_pending = amount_pending + ' . $value . ' WHERE referral_code = ' . $ref;
+							$aff_sql = 'UPDATE referral SET amount_pending = amount_pending + ' . $value . ' WHERE referral_code = \'' . $ref . '\'';
 							$conn->query($aff_sql);
 						}
 					}

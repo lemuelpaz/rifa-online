@@ -1806,7 +1806,7 @@ function check_order_mp($order_id, $id_mp)
                 if ($status_affiliate == 1) {
                     $value = $total_amount * $percentage_affiliate;
                     $value = $value / 100;
-                    $aff_sql = 'UPDATE referral SET amount_pending = amount_pending + ' . $value . ' WHERE referral_code = ' . $ref;
+                    $aff_sql = 'UPDATE referral SET amount_pending = amount_pending + ' . $value . ' WHERE referral_code = \'' . $ref . '\'';
                     $_settings->conn->query($aff_sql);
                 }
             }
@@ -1888,7 +1888,7 @@ function check_order_pg($order_id, $id_mp)
                 if ($status_affiliate == 1) {
                     $value = $total_amount * $percentage_affiliate;
                     $value = $value / 100;
-                    $aff_sql = 'UPDATE referral SET amount_pending = amount_pending + ' . $value . ' WHERE referral_code = ' . $ref;
+                    $aff_sql = 'UPDATE referral SET amount_pending = amount_pending + ' . $value . ' WHERE referral_code = \'' . $ref . '\'';
                     $_settings->conn->query($aff_sql);
                 }
             }
@@ -2017,7 +2017,7 @@ function check_order_pagstar($order_id, $id_mp)
                 if ($status_affiliate == 1) {
                     $value = $total_amount * $percentage_affiliate;
                     $value = $value / 100;
-                    $aff_sql = 'UPDATE referral SET amount_pending = amount_pending + ' . $value . ' WHERE referral_code = ' . $ref;
+                    $aff_sql = 'UPDATE referral SET amount_pending = amount_pending + ' . $value . ' WHERE referral_code = \'' . $ref . '\'';
                     $_settings->conn->query($aff_sql);
                 }
             }
@@ -2146,7 +2146,7 @@ function check_order_op($order_id)
                 if ($status_affiliate == 1) {
                     $value = $total_amount * $percentage_affiliate;
                     $value = $value / 100;
-                    $aff_sql = 'UPDATE referral SET amount_pending = amount_pending + ' . $value . ' WHERE referral_code = ' . $ref;
+                    $aff_sql = 'UPDATE referral SET amount_pending = amount_pending + ' . $value . ' WHERE referral_code = \'' . $ref . '\'';
                     $_settings->conn->query($aff_sql);
                 }
             }
@@ -2226,7 +2226,7 @@ function check_order_pay2m($order_id, $id_mp)
                 if ($status_affiliate == 1) {
                     $value = $total_amount * $percentage_affiliate;
                     $value = $value / 100;
-                    $aff_sql = 'UPDATE referral SET amount_pending = amount_pending + ' . $value . ' WHERE referral_code = ' . $ref;
+                    $aff_sql = 'UPDATE referral SET amount_pending = amount_pending + ' . $value . ' WHERE referral_code = \'' . $ref . '\'';
                     $_settings->conn->query($aff_sql);
                 }
             }

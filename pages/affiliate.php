@@ -23,23 +23,24 @@ if ($_settings->userdata('id') != '') {
     exit();
 }
 
-$orders = $conn->query("SELECT amount_paid, amount_pending FROM referral WHERE customer_id = '{$_settings->userdata('id')}' LIMIT 10");
-$orders2 = $conn->query("SELECT COUNT(id) FROM order_list WHERE referral_id = '{$_settings->userdata('id')}'");
+$uid_afil = intval($_settings->userdata('id'));
+$orders  = $conn->query("SELECT amount_paid, amount_pending FROM referral WHERE customer_id = {$uid_afil} LIMIT 10");
+$orders2 = $conn->query("SELECT COUNT(id) AS total FROM order_list WHERE referral_id = {$uid_afil}");
 
-if ($orders2->num_rows > 0) {
+if ($orders2 && $orders2->num_rows > 0) {
     $rowOrder = $orders2->fetch_assoc();
-    $quantity = $rowOrder['COUNT(id)'];
+    $quantity = $rowOrder['total'] ?? 0;
 }
 
-if ($orders->num_rows > 0) {
+if ($orders && $orders->num_rows > 0) {
     $row = $orders->fetch_assoc();
-    $amount_paid = $row['amount_paid'];
+    $amount_paid    = $row['amount_paid'];
     $amount_pending = $row['amount_pending'];
 }
 
 // Buscar referral_code do afiliado
 $referral_code = '';
-$qref = $conn->query("SELECT referral_code FROM referral WHERE customer_id = '{$_settings->userdata('id')}' LIMIT 1");
+$qref = $conn->query("SELECT referral_code FROM referral WHERE customer_id = {$uid_afil} LIMIT 1");
 if ($qref && $qref->num_rows > 0) {
     $referral_code = $qref->fetch_assoc()['referral_code'];
 }
@@ -47,7 +48,7 @@ if ($qref && $qref->num_rows > 0) {
 // Buscar total de vendas aprovadas
 $aprovado = 0;
 if ($referral_code) {
-    $qAprovado = $conn->query("SELECT SUM(total_amount) as total_aprovado FROM order_list WHERE status = 2 AND referral_id = '$referral_code'");
+    $qAprovado = $conn->query("SELECT SUM(total_amount) as total_aprovado FROM order_list WHERE status = 2 AND referral_id = " . intval($referral_code));
     if ($qAprovado && $qAprovado->num_rows > 0) {
         $aprovado = $qAprovado->fetch_assoc()['total_aprovado'] ?? 0;
     }
@@ -55,7 +56,7 @@ if ($referral_code) {
 
 // Buscar porcentagem do afiliado
 $percentage = 0;
-$qperc = $conn->query("SELECT percentage FROM referral WHERE customer_id = '{$_settings->userdata('id')}' LIMIT 1");
+$qperc = $conn->query("SELECT percentage FROM referral WHERE customer_id = {$uid_afil} LIMIT 1");
 if ($qperc && $qperc->num_rows > 0) {
     $percentage = $qperc->fetch_assoc()['percentage'] ?? 0;
 }
@@ -66,7 +67,7 @@ $comissao = $aprovado * ($percentage / 100);
 // Buscar valor já pago ao afiliado
 $pago = 0;
 if ($referral_code) {
-    $qPago = $conn->query("SELECT SUM(total_amount) as total_pago FROM referral_transactions WHERE referral_id = '$referral_code'");
+    $qPago = $conn->query("SELECT SUM(total_amount) as total_pago FROM referral_transactions WHERE referral_id = " . intval($referral_code));
     if ($qPago && $qPago->num_rows > 0) {
         $pago = $qPago->fetch_assoc()['total_pago'] ?? 0;
     }
