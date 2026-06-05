@@ -35,6 +35,32 @@ class DBResult
     }
 }
 
+/** Divide string por delimitador ignorando conteúdo entre aspas simples */
+function pg_split_outside_quotes(string $str, string $delim = ','): array
+{
+    $result = [];
+    $current = '';
+    $inQuote = false;
+
+    for ($i = 0, $len = strlen($str); $i < $len; $i++) {
+        $c = $str[$i];
+        if ($inQuote) {
+            $current .= $c;
+            if ($c === "'" && ($i === 0 || $str[$i - 1] !== '\\')) $inQuote = false;
+        } elseif ($c === "'") {
+            $inQuote = true;
+            $current .= $c;
+        } elseif ($c === $delim) {
+            $result[] = $current;
+            $current = '';
+        } else {
+            $current .= $c;
+        }
+    }
+    if ($current !== '') $result[] = $current;
+    return $result;
+}
+
 /** Simula mysqli_stmt para prepared statements */
 class PgStatement
 {
@@ -77,8 +103,32 @@ class PgConnection
         $this->pdo = $pdo;
     }
 
+    private function convertInsertSet(string $sql): string
+    {
+        // Converte: INSERT INTO table SET col='val', col2='val2'
+        //       →   INSERT INTO table (col, col2) VALUES ('val', 'val2')
+        if (!preg_match('/^\s*INSERT\s+INTO\s+`?(\w+)`?\s+set\s+(.+)$/is', $sql, $m)) {
+            return $sql;
+        }
+        $table = $m[1];
+        $pairs = pg_split_outside_quotes(trim($m[2]));
+        $cols  = [];
+        $vals  = [];
+        foreach ($pairs as $pair) {
+            $pair = trim($pair);
+            $eq   = strpos($pair, '=');
+            if ($eq === false) continue;
+            $cols[] = trim(trim(substr($pair, 0, $eq)), '`\'" ');
+            $vals[] = trim(substr($pair, $eq + 1));
+        }
+        if (empty($cols)) return $sql;
+        return 'INSERT INTO ' . $table . ' (' . implode(', ', $cols) . ') VALUES (' . implode(', ', $vals) . ')';
+    }
+
     private function translate(string $sql): string
     {
+        // INSERT INTO table SET → padrão SQL
+        $sql = $this->convertInsertSet($sql);
         // Backticks → sem aspas
         $sql = preg_replace('/`([^`]+)`/', '$1', $sql);
         // REGEXP → ~
