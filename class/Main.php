@@ -154,7 +154,9 @@ class Main extends DBConnection
 
 
 
-        $date_of_draw = isset($_POST["date_of_draw"]) ? $this->conn->real_escape_string($_POST["date_of_draw"]) : NULL;
+        $date_of_draw = isset($_POST["date_of_draw"]) ? $this->conn->real_escape_string($_POST["date_of_draw"]) : null;
+        // SQL-safe: NULL quando vazio, 'valor' quando preenchido (PostgreSQL rejeita '' em colunas TIMESTAMP)
+        $date_of_draw_sql = $date_of_draw ? "'" . $date_of_draw . "'" : 'NULL';
 
         $limit_order_remove = $this->conn->real_escape_string($_POST["limit_order_remove"]);
 
@@ -316,9 +318,9 @@ class Main extends DBConnection
                 $cotas_premiadas_box .
                 '\',\'' .
                 $cotas_premiadas_descricao_box .
-                '\',\'' .
-                $date_of_draw .
-                '\',\'' .
+                '\',' .
+                $date_of_draw_sql .
+                ',\'' .
                 $limit_order_remove .
                 '\',\'' .
                 $discount_qty .
@@ -481,9 +483,9 @@ class Main extends DBConnection
                 $cotas_premiadas_box .
                 '\', `cotas_premiadas_descricao_box` = \'' .
                 $cotas_premiadas_descricao_box .
-                '\', `date_of_draw` = \'' .
-                $date_of_draw .
-                '\', `limit_order_remove` = \'' .
+                '\', `date_of_draw` = ' .
+                $date_of_draw_sql .
+                ', `limit_order_remove` = \'' .
                 $limit_order_remove .
                 '\', `discount_qty` = \'' .
                 $discount_qty .
