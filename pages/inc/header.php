@@ -54,6 +54,27 @@ if (isset($parts['query'])) {
          backdrop-filter: blur(10px);
       }
    </style>
+   <?php
+   $bg_color      = $_settings->info('bg_color');
+   $primary_color = $_settings->info('primary_color');
+   $text_color    = $_settings->info('text_color');
+   $card_color    = $_settings->info('card_color');
+   if ($bg_color || $primary_color || $text_color || $card_color): ?>
+   <style>
+      :root {
+         <?php if ($bg_color):      ?>--site-bg:      <?= htmlspecialchars($bg_color) ?>;<?php endif; ?>
+         <?php if ($primary_color): ?>--site-primary: <?= htmlspecialchars($primary_color) ?>;<?php endif; ?>
+         <?php if ($text_color):    ?>--site-text:    <?= htmlspecialchars($text_color) ?>;<?php endif; ?>
+         <?php if ($card_color):    ?>--site-card:    <?= htmlspecialchars($card_color) ?>;<?php endif; ?>
+      }
+      body                                              { background-color: var(--site-bg, #fff) !important; }
+      body, p, span, div, h1, h2, h3, h4, h5, label   { color: var(--site-text, inherit); }
+      .app-card, .card, .custom-content-wrapper        { background-color: var(--site-card, #fff) !important; }
+      .bg-cota, .btn-secondary, .btn-success,
+      .badge.bg-success, [class*="bg-purple"]          { background-color: var(--site-primary, #7e3af2) !important; }
+      #myBar, .progress-bar                            { background-color: var(--site-primary, #7e3af2) !important; }
+   </style>
+   <?php endif; ?>
    <?php if (($enable_pixel == 1) && !empty($facebook_pixel_id)): ?>
       <script>
          ! function(f, b, e, v, n, t, s) {

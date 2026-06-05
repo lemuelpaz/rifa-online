@@ -114,6 +114,8 @@ echo '<ul class="sidebar-menu">';
 echo '<div class="sidebar-separator"></div>';
 // Forma de pagamentos
  echo '<li'.($pageTitle=='gateway'?' class="active"':'').'><a href="./?page=gateway"><i class="fa-brands fa-pix"></i>Forma de pagamentos</a></li>';
+// Design
+ echo '<li'.($pageTitle=='design'?' class="active"':'').'><a href="./?page=design"><i class="fa-duotone fa-palette"></i>Design</a></li>';
 // Configuração
  echo '<li'.($pageTitle=='system_info'?' class="active"':'').'><a href="./?page=system_info"><i class="fa-duotone fa-gear"></i>Configuração</a></li>';
 // Page View
@@ -367,6 +369,19 @@ echo '        </a>' .
     "\r\n" .
     '            <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"' .
     "\r\n" .
+    '              href="./?page=design">' .
+    "\r\n" .
+   '<i class="fa-duotone w-6 fa-palette text-lg mr-4"></i>' .
+    "\r\n" .
+    '              <span>Design</span>' .
+    "\r\n" .
+    '            </a>' .
+    "\r\n\r\n" .
+    '          </li>' .
+    '          <li class="relative px-6 py-3">' .
+    "\r\n" .
+    '            <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"' .
+    "\r\n" .
     '              href="./?page=system_info">' .
     "\r\n" .
    '<i class="fa-duotone w-6 fa-gear text-lg mr-4"></i>' .
@@ -551,6 +566,20 @@ echo '">' .
     '                </li>' .
     "\r\n" .
 	'                <li class="flex">' .
+    "\r\n" .
+    '                  <a class="inline-flex items-center w-full px-2 py-1 text-sm font-semibold transition-colors duration-150 rounded-md hover:bg-gray-100 hover:text-gray-800 dark:hover:bg-gray-800 dark:hover:text-gray-200"' .
+    "\r\n" .
+    '                    href="./?page=design">' .
+    "\r\n" .
+   '<i class="fa-duotone fa-palette text-lg mr-3 w-6"></i>' .
+    "\r\n" .
+    '                    <span>Design</span>' .
+    "\r\n" .
+    '                  </a>' .
+    "\r\n" .
+    '                </li>' .
+    "\r\n" .
+    '                <li class="flex">' .
     "\r\n" .
     '                  <a class="inline-flex items-center w-full px-2 py-1 text-sm font-semibold transition-colors duration-150 rounded-md hover:bg-gray-100 hover:text-gray-800 dark:hover:bg-gray-800 dark:hover:text-gray-200"' .
     "\r\n" .
