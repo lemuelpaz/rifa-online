@@ -19,20 +19,20 @@ if ($date_expirate <= date('Y-m-d')) {
     error_reporting(1); /// error_reporting(E_ALL);
 
     // --- Defina aqui UMA vez:
-    $BASE_URL  = rtrim('https://rifa.obetzera.bet/', '/') . '/';
+    $BASE_URL  = rtrim(getenv('BASE_URL') ?: 'https://rifa.obetzera.bet/', '/') . '/';
     $BASE_PATH = rtrim(str_replace('\\', '/', __DIR__), '/') . '/';
 
     // --- Todas as constantes partem das duas canônicas acima:
     $consts = [
         'BASE_URL'   => $BASE_URL,
         'BASE_REF'   => $BASE_URL,
-        'base_url'   => $BASE_URL,   // compatibilidade se o projeto usa este nome
+        'base_url'   => $BASE_URL,
         'BASE_APP'   => $BASE_PATH,
-        'base_app'   => $BASE_PATH,  // compatibilidade
-        'DB_SERVER'  => 'localhost',
-        'DB_USERNAME'=> 'SEU_USUARIO',
-        'DB_PASSWORD'=> 'SENHA',
-        'DB_NAME'    => 'SEU_BANCO',
+        'base_app'   => $BASE_PATH,
+        'DB_SERVER'  => getenv('DB_SERVER')   ?: 'localhost',
+        'DB_USERNAME'=> getenv('DB_USERNAME') ?: 'root',
+        'DB_PASSWORD'=> getenv('DB_PASSWORD') ?: '',
+        'DB_NAME'    => getenv('DB_NAME')     ?: 'rifa',
     ];
 
     foreach ($consts as $name => $value) {

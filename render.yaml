@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: rifa-online
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    port: 80
+    envVars:
+      - key: BASE_URL
+        sync: false
+      - key: DB_SERVER
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        sync: false
